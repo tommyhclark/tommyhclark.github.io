@@ -1,0 +1,134 @@
+body{
+    background-color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif ;
+    margin: auto;
+    line-height: 1.5;
+    width: 50%;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 50px;
+}
+h1{
+    color: rgb(66, 65, 65);
+    font-weight: bold;
+}
+
+em{
+    font-size:16px;
+    color: rgb(0, 123, 237);
+}
+
+em1{
+    color: rgb(66, 65, 65);
+}
+
+a { 
+    white-space: normal;
+    text-decoration-line: none;
+    display: inline; 
+}
+
+a:hover {
+    color: rgb(0, 123, 237);
+}
+
+h2{
+    color: rgb(66, 65, 65);
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+h3{
+    color: rgb(66, 65, 65);
+    font-weight: bold;
+    font-size:22px;
+    margin:0;
+}
+
+ul{
+    color: rgb(66, 65, 65);
+}
+
+ps{
+    color: rgb(66, 65, 65);
+    margin:0;
+}
+
+p{
+    color: rgb(66, 65, 65);
+    margin:0;
+}
+.stones{
+    width: 100%;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+/* The sidebar menu */
+.sidenav {
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+  width: 15%; /* Set the width of the sidebar */
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: 0;
+  background-color: white; /* Black */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 50px;
+  padding-left: 25px;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  text-decoration: none;
+  font-size: 15px;
+  color: rgb(66, 65, 65);
+  display: block;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+    color: rgb(0, 123, 237);
+}
+
+.fa-twitter:before {
+    content: ""
+}
+
+.fa-twitter-square:before {
+    content: ""
+}
+
+.social-icons .fa-twitter, .social-icons .fa-twitter-square {
+    color:#55acee
+}
+
+.btn--twitter {
+    background-color:#55acee
+}
+
+.btn--twitter:hover {
+    background-color:#448abe
+}
+
+/* Use a media query to add a breakpoint at 800px: */
+@media screen and (max-width: 450px) {
+    .body{
+      width: 100%;
+      margin: 0px;
+      padding-left: 0px; /* The width is 100%, when the viewport is 800px or smaller */
+    }
+    .sidenav{
+        height: 100%; /* Full-height: remove this if you want "auto" height */
+        width: 100%; /* Set the width of the sidebar */
+        margin: 0px;
+        position: static; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: auto; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: white; /* Black */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 20px;
+        padding-left: 0px;
+    }
+}
