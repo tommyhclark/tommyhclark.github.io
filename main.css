@@ -32,6 +32,39 @@ a:hover {
     color: rgb(0, 123, 237);
 }
 
+/* Navigation Bar */
+.navbar {
+    background-color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar ul {
+    list-style: none;
+    margin: 0;
+    padding: 20px 50px;
+    display: flex;
+    gap: 30px;
+}
+
+.navbar li {
+    display: inline;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: rgb(66, 65, 65);
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    color: rgb(0, 123, 237);
+}
+
 h2{
     color: rgb(66, 65, 65);
     font-weight: bold;
