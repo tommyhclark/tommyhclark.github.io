@@ -25,7 +25,7 @@
             <h3> Tommy Clark </h3>
             <ps> Pasadena, CA</ps>
             <br>
-            <br>
+
             <br>
             <a href="https://github.com/tommyhclark", style="display: inline;"><i class="fa fa-github-square"> Github</i></a>
             <br>
@@ -43,13 +43,64 @@
             </p>
             I am a physicist and engineer interested in autonomy. Current work is focused on autonomous trajectory design in Cislunar space.
             </br>
-        
-            <ul>
-                <li> MS Aerospace Engineering (Astrodynamics and Satellite Navigation) @ CU Boulder (2026) (advised by Professor Dan Scheeres) </li>
-                <li>BS Physics (High Energy) @ Caltech (2024)</li>
-            <br>
+            <h2> Education </h2>
+            
+            <div class="education-list">
+                <!-- CU Boulder -->
+                <div class="education-item">
+                    <div class="education-header" onclick="toggleEducation(this)">
+                        <img src="Images/boulder-logo.avif" alt="CU Boulder" class="school-logo">
+                        <div class="degree-info">
+                            <h3 class="school-name">CU Boulder</h3>
+                            <p class="degree-title">MS Aerospace Engineering</p>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="education-details">
+                        <p><strong>Specialization:</strong> Astrodynamics and Satellite Navigation</p>
+                        <p><strong>Expected Graduation:</strong> 2026</p>
+                        <p><strong>Advisor:</strong> Professor Dan Scheeres</p>
+                    </div>
+                </div>
+                
+                <!-- Caltech -->
+                <div class="education-item">
+                    <div class="education-header" onclick="toggleEducation(this)">
+                        <img src="Images/caltechlogo.png" alt="Caltech" class="school-logo">
+                        <div class="degree-info">
+                            <h3 class="school-name">Caltech</h3>
+                            <p class="degree-title">BS Physics</p>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="education-details">
+                        <p><strong>Focus:</strong> High Energy Physics</p>
+                        <p><strong>Graduation:</strong> 2024</p>
+                    </div>
+                </div>
+
+                <!-- HCHS -->
+                <div class="education-item">
+                    <div class="education-header" onclick="toggleEducation(this)">
+                        <img src="Images/hchs.png" alt="Caltech" class="school-logo">
+                        <div class="degree-info">
+                            <h3 class="school-name">Hinsdale Central High School</h3>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="education-details">
+                        <p><strong>Focus:</strong> High Energy Physics</p>
+                        <p><strong>Graduation:</strong> 2020</p>
+                    </div>
+                </div>
+            </div>
 
         </div>
+        <script>
+            function toggleEducation(headerElement) {
+                headerElement.classList.toggle('expanded');
+            }
+        </script>
     </body>
 
 
