@@ -197,8 +197,11 @@ p{
 .school-logo {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    object-fit: cover;
     flex-shrink: 0;
+    display: block;
+    border-radius: 8px;
+    background-color: white;
 }
 
 .degree-info {
@@ -280,8 +283,11 @@ p{
 .inst-logo {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    object-fit: cover;
     flex-shrink: 0;
+    display: block;
+    border-radius: 8px;
+    background-color: white;
 }
 
 .project-info {
