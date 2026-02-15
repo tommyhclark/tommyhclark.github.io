@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <head>
         <meta name="google-site-verification" content="nhdzxIujHjo7BJQTSLfL-6hNNFkjwTqk34M7Z2IaFS0" />
-        <title>Projects - Tommy Clark</title>
+        <title>Research - Tommy Clark</title>
         <link rel="shortcut icon" type="image/png" href="Images/icon.png?"/>
         <link rel="stylesheet" href="main.css?">
     </head>
@@ -14,39 +14,93 @@
         <nav class="navbar">
             <ul>
                 <li><a href="index.html">About</a></li>
-                <li><a href="projects.html">Projects</a></li>
+                <li><a href="projects.html">Research</a></li>
+                <li><a href="hobbies.html">Hobbies</a></li>
             </ul>
         </nav>
     </header>
 
     <body>
-        <div class = "sidenav">
-            <img class=stones src="Images/pepperdine.png", style="border-radius:15%;">
-            <h3> Tommy Clark </h3>
-            <ps> Boulder, CO</ps>
-            <br>
-            <br>
-            <br>
-            <a href="https://github.com/tclarkf35", style="display: inline;"><i class="fa fa-github-square"> Github</i></a>
-            <br>
-            <a href="https://scholar.google.com/citations?hl=en&user=0_H12LgAAAAJ&view_op=list_works&gmla=AJsN-F78_cCEYnbCfg-4TyhJ1wwWpsqRUtcQ1Zkl7Fo3-ZiIrJgLU4J_7Egk6dEWRBq11LvFyGQjBL4I_zLwrJweegazga4yNC1pfe2uV4urAu68kV0mfI4", style="display: inline;"><i class="fa fa-graduation-cap"> Google Scholar</i></a>
-            <br>
-            <a href="https://www.linkedin.com/in/tommy-clark-56a8a41bb/", style="display: inline;"><i class="fa fa-linkedin-square"> Linkedin</i></a>
-            <br>
-            <br>
-            <ps><a href="resources/CV.pdf", style="display: inline;">CV </a> or
-            <a href="resources/CV.pdf", style="display: inline;">Resume</a></ps>
-        </div>
-        
+        <div id="sidenav-include" data-src="/sidenav.html" aria-hidden="true"></div>
+        <br>
+        <h3 class="section-title">Graduate Research</h3>
+        As a graduate student at CU Boulder, I was part of the Celestial and Space Mechanics Laboratory (CSML) under Professor Dan Scheeres. 
+        The work was supported by the George Born Fellowship, NASA Space Technology Graduate Research Opportunity (NSTGRO), and the National Science Foundation GRFP.
         <div class="main">
-            <h1>Projects</h1>
-            
-            <ul>
-                <li>
-                    <a href="projects/earliest-stage-galaxy-evolution.html">Earliest Stage in Galaxy Evolution</a>
-                </li>
-            </ul>
+             <div class="project-list">
+                <!-- CU Boulder -->
+                <div class="project-item">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <img src="Images/csml.png" alt="CU Boulder" class="inst-logo">
+                        <div class="project-info">
+                            <h3 class="project-name">Data-Driven Representations of Cislunar Trajectories</h3>
+                            <p class="project-title">Colorado Center for Astrodynamics Research, Boulder, CO</p>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="project-details">
+                        <p><strong>Dates:</strong> 08/2024-Present</p>
+                        <p><strong>Principal Investigator:</strong> Professor Dan Scheeres</p>
+                    </div>
+                </div>
+
         </div>
+
+        <br>
+        <h3 class="section-title">Undergraduate Research</h3>
+        While at Caltech, I was able to take part in multiple research projects through the Summer Undergraduate Research Fellowship (SURF) program.
+             <div class="project-list">
+        <!-- TFR Lab -->
+                <div class="project-item">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <img src="Images/caltechlogo.png" alt="CU Boulder" class="inst-logo">
+                        <div class="project-info">
+                            <h3 class="project-name">Measurements of a Quantum Spin Glass</h3>
+                            <p class="project-title">Caltech, Pasadena, CA</p>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="project-details">
+                        <p><strong>Dates:</strong> 08/2024-Present</p>
+                        <p><strong>Principal Investigator:</strong> Professor Tom Rosenbaum</p>
+                    </div>
+                </div>
+
+                <!-- NBI -->
+                <div class="project-item">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <img src="Images/ku.jpg" alt="CU Boulder" class="inst-logo">
+                        <div class="project-info">
+                            <h3 class="project-name">High-Redshift Galaxy Evolution</h3>
+                            <p class="project-title">Niels Bohr Institute, Copenhagen, Denmark</p>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="project-details">
+                        <p><strong>Dates:</strong> 06/2021-09/2021 (DK), 09/2021-01/2023 (USA)</p>
+                        <p><strong>Principal Investigator:</strong> Professor Charles Steinhardt</p>
+                        <a href="projects/earliest-stage-galaxy-evolution.html">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Load shared sidenav fragment into pages
+            (function loadSidenav() {
+                const container = document.getElementById('sidenav-include');
+                if (!container) return;
+                const src = container.getAttribute('data-src') || '/sidenav.html';
+                fetch(src)
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                    .then(html => { container.innerHTML = html; container.setAttribute('aria-hidden','false'); })
+                    .catch(err => console.error('Failed to load sidenav:', err));
+            })();
+
+            // Toggle expand/collapse for project items
+            function toggleProject(headerElement) {
+                headerElement.classList.toggle('expanded');
+            }
+        </script>
     </body>
 
 </html>

@@ -7,7 +7,8 @@
         <nav class="navbar">
             <ul>
                 <li><a href="index.html">About</a></li>
-                <li><a href="projects.html">Projects</a></li>
+                <li><a href="projects.html">Research</a></li>
+                <li><a href="hobbies.html">Hobbies</a></li>
             </ul>
         </nav>
     </header>
@@ -20,26 +21,10 @@
     </head>
 
     <body>
-        <div class = "sidenav">
-            <img class=stones src="Images/pepperdine.png", style="border-radius:15%;">
-            <h3> Tommy Clark </h3>
-            <ps> Pasadena, CA</ps>
-            <br>
-
-            <br>
-            <a href="https://github.com/tommyhclark", style="display: inline;"><i class="fa fa-github-square"> Github</i></a>
-            <br>
-            <a href="https://scholar.google.com/citations?hl=en&user=0_H12LgAAAAJ&view_op=list_works&gmla=AJsN-F78_cCEYnbCfg-4TyhJ1wwWpsqRUtcQ1Zkl7Fo3-ZiIrJgLU4J_7Egk6dEWRBq11LvFyGQjBL4I_zLwrJweegazga4yNC1pfe2uV4urAu68kV0mfI4", style="display: inline;"><i class="fa fa-graduation-cap"> Google Scholar</i></a>
-            <br>
-            <a href="https://www.linkedin.com/in/tommyhclark/", style="display: inline;"><i class="fa fa-linkedin-square"> Linkedin</i></a>
-            <br>
-            <br>
-            <ps><a href="resources/CV.pdf", style="display: inline;">CV </a> or
-            <a href="resources/CV.pdf", style="display: inline;">Resume</a></ps>
-        </div>
+        <div id="sidenav-include" data-src="/sidenav.html" aria-hidden="true"></div>
         
         <div class="main">
-
+            <br>
             </p>
             I am a physicist and engineer interested in autonomy. Current work is focused on autonomous trajectory design in Cislunar space.
             </br>
@@ -49,7 +34,7 @@
                 <!-- CU Boulder -->
                 <div class="education-item">
                     <div class="education-header" onclick="toggleEducation(this)">
-                        <img src="Images/boulder-logo.avif" alt="CU Boulder" class="school-logo">
+                        <img src="Images/boulder-logo.avif" alt="CU Boulder" class="inst-logo">
                         <div class="degree-info">
                             <h3 class="school-name">CU Boulder</h3>
                             <p class="degree-title">MS Aerospace Engineering</p>
@@ -57,9 +42,12 @@
                         <span class="expand-icon">▼</span>
                     </div>
                     <div class="education-details">
-                        <p><strong>Specialization:</strong> Astrodynamics and Satellite Navigation</p>
+                        <p><strong>Focus Area:</strong> Astrodynamics and Satellite Navigation (Certificate)</p>
                         <p><strong>Expected Graduation:</strong> 2026</p>
+                        <p><strong>GPA:</strong> 4.0/4.0</p>
                         <p><strong>Advisor:</strong> Professor Dan Scheeres</p>
+                        <p><strong>Courses:</strong> Statistical Orbit Determination, Optimal Trajectories, Attitude Dynamics, Advanced Astrodynamics,
+                        GNSS, Linear Control Systems, State Estimation, Astrodynamics</p>
                     </div>
                 </div>
                 
@@ -74,8 +62,25 @@
                         <span class="expand-icon">▼</span>
                     </div>
                     <div class="education-details">
-                        <p><strong>Focus:</strong> High Energy Physics</p>
+                        <p><strong>Track:</strong> High Energy Physics</p>
                         <p><strong>Graduation:</strong> 2024</p>
+                        <p><strong>GPA:</strong> 4.26/4.0</p>
+                    </div>
+                </div>
+
+                <!-- ULO -->
+                <div class="education-item">
+                    <div class="education-header" onclick="toggleEducation(this)">
+                        <img src="Images/stanford.png" alt="Caltech" class="school-logo">
+                        <div class="degree-info">
+                            <h3 class="school-name">Stanford Pre-Collegiate University-Level Online Math & Physics</h3>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="education-details">
+                        <p><strong>Courses:</strong> Linear Algebra, Differential Equations</p>
+                        <p><strong>Graduation:</strong> 2020</p>
+                        <p><strong>GPA:</strong> 4.0/4.0</p>
                     </div>
                 </div>
 
@@ -91,12 +96,25 @@
                     <div class="education-details">
                         <p><strong>Focus:</strong> High Energy Physics</p>
                         <p><strong>Graduation:</strong> 2020</p>
+                        <p><strong>GPA:</strong> 4.0/4.0</p>
+                        <p><strong>Class Rank:</strong> 1/800</p>
                     </div>
                 </div>
             </div>
 
         </div>
         <script>
+            // Load shared sidenav fragment into pages
+            (function loadSidenav() {
+                const container = document.getElementById('sidenav-include');
+                if (!container) return;
+                const src = container.getAttribute('data-src') || '/sidenav.html';
+                fetch(src)
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                    .then(html => { container.innerHTML = html; container.setAttribute('aria-hidden','false'); })
+                    .catch(err => console.error('Failed to load sidenav:', err));
+            })();
+
             function toggleEducation(headerElement) {
                 headerElement.classList.toggle('expanded');
             }

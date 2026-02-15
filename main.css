@@ -45,7 +45,7 @@ a:hover {
 .navbar ul {
     list-style: none;
     margin: 0;
-    padding: 20px 50px;
+    padding: 20px 0px;
     display: flex;
     gap: 30px;
 }
@@ -176,7 +176,7 @@ p{
     border-radius: 8px;
     margin-bottom: 15px;
     overflow: hidden;
-    background-color: #f9f9f9;
+    background-color: white;
     transition: all 0.3s ease;
 }
 
@@ -231,7 +231,8 @@ p{
 
 .education-details {
     max-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    padding-left: 10px;
     transition: max-height 0.3s ease, padding 0.3s ease;
     border-top: 1px solid #e0e0e0;
     background-color: white;
@@ -243,6 +244,89 @@ p{
 }
 
 .education-details p {
+    margin: 8px 0;
+    color: rgb(66, 65, 65);
+    font-size: 14px;
+}
+
+/* Project Section */
+.project-list {
+    margin: 20px 0;
+}
+
+.project-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.project-item:hover {
+    border-color: rgb(0, 123, 237);
+    box-shadow: 0 2px 8px rgba(0, 123, 237, 0.1);
+}
+
+.project-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.inst-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.project-info {
+    flex: 1;
+}
+
+.project-name {
+    margin: 0;
+    color: rgb(66, 65, 65);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.inst-title, .project-title {
+    margin: 4px 0 0 0;
+    color: rgb(100, 100, 100);
+    font-size: 14px;
+}
+
+.project-header.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
+.project-details {
+    max-height: 0;
+    overflow-y: auto;
+    padding-left: 10px;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    border-top: 1px solid #e0e0e0;
+    background-color: white;
+}
+
+.expand-icon {
+    font-size: 12px;
+    color: black;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.project-header.expanded + .project-details {
+    max-height: 180px;
+    padding: 15px;
+}
+
+.project-details p {
     margin: 8px 0;
     color: rgb(66, 65, 65);
     font-size: 14px;
