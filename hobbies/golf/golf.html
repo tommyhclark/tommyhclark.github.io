@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<html lang="en">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <head>
+        <title>Golf - Tommy Clark</title>
+        <link rel="shortcut icon" type="image/png" href="../../Images/icon.png?"/>
+        <link rel="stylesheet" href="../../main.css?">
+    </head>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="../../index.html">About</a></li>
+                <li><a href="../../research.html">Research</a></li>
+                <li><a href="../../hobbies.html">Hobbies</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <body>
+        <div id="sidenav-include" data-src="/sidenav.html" aria-hidden="true"></div>
+        <br>
+        <script>
+            (function loadSidenav() {
+                const container = document.getElementById('sidenav-include');
+                if (!container) return;
+                const src = container.getAttribute('data-src') || '/sidenav.html';
+                fetch(src)
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                    .then(html => { container.innerHTML = html; container.setAttribute('aria-hidden','false'); })
+                    .catch(err => console.error('Failed to load sidenav:', err));
+            })();
+        </script>
+
+        <div class="main">
+            Golf
+        </div>
+    </body>
+</html>
+
