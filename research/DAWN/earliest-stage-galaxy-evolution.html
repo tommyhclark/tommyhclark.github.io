@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<html lang="en">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <head>
+        <title>The Earliest Stage in Galaxy Evolution - Tommy Clark</title>
+        <link rel="shortcut icon" type="image/png" href="/Images/icon.png?"/>
+        <link rel="stylesheet" href="/main.css?">
+        <style>
+            #imageModal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+            #imageModal.show {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .modal-content {
+                position: relative;
+                max-width: 90%;
+                max-height: 90vh;
+                object-fit: contain;
+            }
+            .close-modal {
+                position: absolute;
+                top: 20px;
+                right: 30px;
+                font-size: 40px;
+                font-weight: bold;
+                color: white;
+                cursor: pointer;
+                background: rgba(0, 0, 0, 0.5);
+                border: none;
+                padding: 5px 15px;
+                border-radius: 5px;
+            }
+            .close-modal:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+            #galaxyPlot {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/index.html">About</a></li>
+                <li><a href="/research.html">Research</a></li>
+                <li><a href="/hobbies.html">Hobbies</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <body>
+        <div class = "sidenav">
+            <img class=stones src="/Images/profile.png", style="border-radius:15%;">
+            <h3> Tommy Clark </h3>
+            <ps> Boulder, CO</ps>
+            <br>
+            <br>
+            <br>
+            <a href="https://github.com/tclarkf35", style="display: inline;"><i class="fa fa-github-square"> Github</i></a>
+            <br>
+            <a href="https://scholar.google.com/citations?hl=en&user=0_H12LgAAAAJ&view_op=list_works&gmla=AJsN-F78_cCEYnbCfg-4TyhJ1wwWpsqRUtcQ1Zkl7Fo3-ZiIrJgLU4J_7Egk6dEWRBq11LvFyGQjBL4I_zLwrJweegazga4yNC1pfe2uV4urAu68kV0mfI4", style="display: inline;"><i class="fa fa-graduation-cap"> Google Scholar</i></a>
+            <br>
+            <a href="https://www.linkedin.com/in/tommy-clark-56a8a41bb/", style="display: inline;"><i class="fa fa-linkedin-square"> Linkedin</i></a>
+            <br>
+            <br>
+            <ps><a href="/resources/CV.pdf", style="display: inline;">CV </a> or
+            <a href="/resources/CV.pdf", style="display: inline;">Resume</a></ps>
+        </div>
+        
+        <div class="main">
+            <h1>The Earliest Stage in Galaxy Evolution</h1>
+            <p>In this work, we demonstrated that a new method to estimate the dust temperatures of galaxies from photometric data can be used to help identify a previously 
+                unobserved earliest-stage in galaxy evolution. 
+            </p>
+            
+            <h2>Introduction</h2>
+            <p>
+                The initial mass function (IMF) of a galaxy describes the distribution of stellar masses generated inside a galaxy. Dr. Adam Jermyn and Dr. Charles Steinhardt showed that this function should have some dependence on the dust temperature in a galaxy. 
+                Since stars are formed from a competition between gravity and thermodynamics, a higher temperature dust should be able to resist stronger gravity and thus skew the IMF slightly towards higher mass stars. Photometric surveys (large catalogs
+                of light bands for galaxies), like the COSMOS 2020 survey, fit the photometry of a galaxy to theoretical models which depend on this IMF. Selecting the best-fit IMF the provides a proxy for the dust-temperature of the galaxy which
+                had not been estimated before. This result led to a flurry of research including many of the papers below. 
+            </p>
+
+            <h2>Results</h2>
+            <p>
+                With this dust-temperature in hand, we began to explore the distribution of galaxies as they quiesce. A quiescent galaxy is no longer forming stars and is nearing the end of its lifetime. Interestingly, these galaxies tend to appear red
+                (since the high-mass Blue stars die out earlier) and so they are easy to pick out. However, when this quiescence happens is an interesting question as the galaxies still appear "blue" when they are in the process of shutting down. The figure below is typicaly how
+                quiescent galaxies are selected. Plotting two light-spectra relations, the galaxies which fall in the upper left corner are labelled "quiescent". However, when we color by temperature, we see a more telling story where many galaxies outside the box have the colder temperature
+                characteristic of a quiescent galaxy.
+                <br>
+                <img id="galaxyPlot" src="../DAWN/UVJ_By_Temp_Density.jpeg" alt="Quiescence" style="max-width: 100%; height: auto; margin-top: 30px; margin-bottom: 30px;">
+                <br>
+                Since we previously were unable to catch galaxies as they shut off, we do not yet know why galaxies turn off because we have no way to identify the galaxies which are in the act of shutting down. The primary focus of my work was to rule out some possible mechanisms for why a galaxy shuts down. 
+                    Three mechanisms were proposed for shutdown: Galaxy Mergers, Active-Galactic-Nuclei (AGNs), and Gas-Depletion. During the work, a version of the following plot was generated time and time again by multiple researchers in the group:
+                    <br>
+                    <img id="galaxyPlot" src="../DAWN/galaxyplot.png" alt="Galaxy plot showing shutdown mechanisms" style="max-width: 100%; height: auto; margin-top: 30px; margin-bottom: 30px;">
+           
+                In previous reseach, the galaxies in the survey were all assumed to be near the Milky Way dust temperature (~27K). Thus, there was a big grouping of Star-Forming (SF) galaxies at high Star-Formation-Rates (SFR) and quiescent galaxies with low SFR.
+                As it turnout, when we expanded along the temperature axis, a new grouping of galaxies with very high temperatures was found. These were coined as "core forming" as observational data confirmed they were in fact much smaller extent with star formation occuring only near
+                the core. Furthermore, selecting the low temperature star-forming galaxies, we observed that they did not have statistically significant fractions of mergers or AGNs. Instead, gas depletion appeared to be the most likely mechanism for shut down. This is also suggested by
+                the observations which show the core transitioning from "blue" to "red" and the star-formation moving outwards in the galaxy to chase the remaining dust.
+            </p>
+
+            <h2>Methods</h2>
+            <p>
+                In this work, we used massive databases of photometric results from telescopes (Terabytes of data). Subsets of high redshift galaxies were selected using SQL commands and the photometry was fit for various physical parameters. Using a chi-squared result with the temperature-dependent IMF,
+                we then had a data set of galaxy properties and dust temperatures. I primarily used Python and SQL to select candidate galaxies and explore relationships between them. Another method we demonstrated was the use of a machine-learning clustering algorithm called TSNE. TSNE is processed on the raw photometric
+                data and projects the high-dimensional data into a two-dimensional plane keeping similar data close together. We labelled five regimes of galaxy evolution in the plot above and saw that the TSNE clustering could be used as another mechanism to identify the core forming galaxies.
+                The regimes are: <strong>1.</strong>  High temperature (core-forming). <strong>2.</strong>  Transition: core-forming to typical SF <strong>3.</strong>  Typical SF <strong>4.</strong>  Transition to Quiescent <strong>5.</strong> Quiescent.
+                
+                <img id="galaxyPlot" src="../DAWN/tsne.png" alt="TSNE Galaxy Regimes" style="max-width: 100%; height: auto; margin-top: 30px; margin-bottom: 30px;">
+
+            </p>
+
+            <h2> Publications</h2>
+            <p> <ul>
+                    <li>
+                        Charles L Steinhardt, Vadim Rusakov, <strong>Thomas H Clark</strong>, Andrei Diaconu, John Forbes, Conor McPartland, Albert Sneppen, John Weaver
+                        <br>
+                        <a href="https://iopscience.iop.org/article/10.3847/2041-8213/acd447", style="display: inline; white-space: normal;"><em>The Earliest Stage of Galactic Star Formation</em></a>
+                    </li>
+                    <br>
+                    <li> 
+                        Charles L Steinhardt, Albert Sneppen, Hagan Hensley, Adam S Jermyn, Basel Mostafa, John R Weaver, Gabriel Brammer, 
+                        <strong>Thomas H Clark </strong>, Iary Davidzon, Andrei C Diaconu, Bahram Mobasher, Vadim Rusakov, Sune Toft
+                        <br>
+                        <a href="https://arxiv.org/pdf/2206.01750.pdf", style="display: inline; white-space: normal;"><em>Implications of a Temperature Dependent IMF III: Mass Growth and Quiescence</em></a>
+                    </li>
+                    <br>
+                    <li> 
+                        Charles L Steinhardt, Albert Sneppen, Basel Mostafa, Hagan Hensley, Adam S Jermyn, Adrian Lopez, John Weaver, Gabriel Brammer, 
+                        <strong> Thomas H Clark</strong>, Iary Davidzon, Andrei C Diaconu, Bahram Mobasher, Vadim Rusakov, Sune Toft
+                        <br>
+                        <a href="https://arxiv.org/pdf/2205.14161", style="display: inline; white-space: normal;"><em>Implications of a Temperature Dependent IMF II: An Updated View of the Star-Forming Main Sequence</em></a>
+                    </li>
+                </ul>
+            </p>
+        </div>
+
+        <div id="imageModal">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <img class="modal-content" id="modalImage" src="" alt="Galaxy plot">
+        </div>
+
+        <script>
+            const modal = document.getElementById('imageModal');
+            const galaxyPlot = document.getElementById('galaxyPlot');
+            const modalImage = document.getElementById('modalImage');
+
+            galaxyPlot.addEventListener('click', function() {
+                modalImage.src = this.src;
+                modal.classList.add('show');
+            });
+
+            function closeModal() {
+                modal.classList.remove('show');
+            }
+
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        </script>
+    </body>
+
+</html>
+

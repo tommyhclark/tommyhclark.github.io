@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<html lang="en">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <head>
+        <title>Measurements of a Quantum Spin Glass - Tommy Clark</title>
+        <link rel="shortcut icon" type="image/png" href="/Images/icon.png?"/>
+        <link rel="stylesheet" href="/main.css?">
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script>
+            MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                }
+            };
+        </script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <style>
+            #imageModal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+            #imageModal.show {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .modal-content {
+                position: relative;
+                max-width: 90%;
+                max-height: 90vh;
+                object-fit: contain;
+            }
+            .close-modal {
+                position: absolute;
+                top: 20px;
+                right: 30px;
+                font-size: 40px;
+                font-weight: bold;
+                color: white;
+                cursor: pointer;
+                background: rgba(0, 0, 0, 0.5);
+                border: none;
+                padding: 5px 15px;
+                border-radius: 5px;
+            }
+            .close-modal:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+            #galaxyPlot {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="/index.html">About</a></li>
+                <li><a href="/research.html">Research</a></li>
+                <li><a href="/hobbies.html">Hobbies</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <body>
+        <div class = "sidenav">
+            <img class=stones src="/Images/profile.png", style="border-radius:15%;">
+            <h3> Tommy Clark </h3>
+            <ps> Boulder, CO</ps>
+            <br>
+            <br>
+            <br>
+            <a href="https://github.com/tclarkf35", style="display: inline;"><i class="fa fa-github-square"> Github</i></a>
+            <br>
+            <a href="https://scholar.google.com/citations?hl=en&user=0_H12LgAAAAJ&view_op=list_works&gmla=AJsN-F78_cCEYnbCfg-4TyhJ1wwWpsqRUtcQ1Zkl7Fo3-ZiIrJgLU4J_7Egk6dEWRBq11LvFyGQjBL4I_zLwrJweegazga4yNC1pfe2uV4urAu68kV0mfI4", style="display: inline;"><i class="fa fa-graduation-cap"> Google Scholar</i></a>
+            <br>
+            <a href="https://www.linkedin.com/in/tommy-clark-56a8a41bb/", style="display: inline;"><i class="fa fa-linkedin-square"> Linkedin</i></a>
+            <br>
+            <br>
+            <ps><a href="/resources/CV.pdf", style="display: inline;">CV </a> or
+            <a href="/resources/CV.pdf", style="display: inline;">Resume</a></ps>
+        </div>
+        
+        <div class="main">
+            <h1>Measurements of a Quantum Spin Glass</h1>
+            <p>In this work, we experimented on Lithium Holmium Tetra-Flouride, a known quantum spin glass at low temperatures and high transverse magnetic fields. This required going to milli-Kelvin temperatures
+                to observe the quantum phase transition to the spin-glass. Multiple experiments were run and resulted in the observation of some novel and very strange quantum effects.
+            </p>
+            
+            <h2>Introduction</h2>
+            <p>
+                Quantum materials are very exciting as they allow us to observe strange macroscopic behaviors that emerge as a result of quantum phenomena such as tunneling and superpositions. These have applications to super conductivity and can be used to for quantum annealing for nonconvex optimization. 
+                In this work, we studied a particularly strange phenomenon, Quantum Rejuventation. The premise is simple, albeit strange: when two different magnetic fields are applied to a quantum spin glass, the material seems to "remember" the previous field. This behavior has been observed of classical spin glasses
+                before but quantum spin glasses have only recently been studied.
+            </p>
+
+            <h2>Results</h2>
+            <p>
+                As with all experiments, after a lot of tinkering with setting up magnetic fields (please never ask me about coil winding), we were able to find a positive result. Suprisingly, the quantum spin glass seems to have specially enhanced memory. In the plot below, we show the appication of two magnetic fields which are interchanged at $t_1$
+                and then again at $t_2$. Four different "substitute" transverse magnetic fields are shown. To study memory, we shift the curve (which represents the magnetic susceptibility, a property of a material) back until it lines up with the original susceptibility curve during $t_1$. We see that the shift requires a negative time constant relative to $t_2$. For a classical glass
+                this has been observed to be near $0$s. Thus, our quantum spin glass is remembering even earlier times. This has never been observed before and a theoretical explanation of this macroscopic quantum phenomena has not yet been found.
+                Simulations of the quantum spin glass may help us find the theoretical explanation.
+            </p>
+            <img id="galaxyPlot" src="../TFR/dupuis_Fig_Remake.png" alt="Quantum Rejuvenation" style="max-width: 100%; height: auto; margin-top: 30px; margin-bottom: 30px;">
+
+            <h4>LEO Satellite Optimization Connection</h2>
+            <p>
+                    As it turns out, quantum annealing (the slow change in magnetic field of a spin array) can be used to solve convex optimization problems. This is the premise of the quantum computing company DWave, whose chief scientist I had the fortune of working for a week with during the project (we discussed a lot about use a quantum annealer to optimize a neural network). This method
+                    was recently explored for the optimization of LEO Satellite partitioning where the quantum speed up for solving the partitioning problem can be observed. I recently presented this to my lab group at CU Boulder as an interesting interesection of my past and current 
+                    research.
+                    <br>
+                    <br>
+                    <a href="/resources/Astroseminar 2026.pptx" style="display: inline;"><i> Astroseminar Presentation Slides</i></a>
+
+            </p>
+
+            <h2> Publications</h2>
+            In progress:
+            <p> <ul>
+                    
+                    <li>
+                        Stephen Armstrong, Thomas Clark, Daniel Silevitch, Tom Rosenbaum, and Phillip Stamp
+                        <br>
+                        <em>Measurements of a Quantum Spin Glass</em>
+                    </li>
+                </ul>
+            </p>
+        </div>
+
+        <div id="imageModal">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <img class="modal-content" id="modalImage" src="" alt="Galaxy plot">
+        </div>
+
+        <script>
+            const modal = document.getElementById('imageModal');
+            const galaxyPlot = document.getElementById('galaxyPlot');
+            const modalImage = document.getElementById('modalImage');
+
+            galaxyPlot.addEventListener('click', function() {
+                modalImage.src = this.src;
+                modal.classList.add('show');
+            });
+
+            function closeModal() {
+                modal.classList.remove('show');
+            }
+
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        </script>
+    </body>
+
+</html>
+
