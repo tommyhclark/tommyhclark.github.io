@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Periodic Orbit Autoencoder - Tommy Clark</title>
+    <meta name="description" content="Autoencoder neural networks that compress entire CR3BP periodic orbit families into a single latent parameter, with an in-browser decoder demo.">
+    <link rel="shortcut icon" type="image/png" href="/Images/icon.png?"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --surface: #0e121a;
+            --surface-2: #131926;
+            --border: #1f2735;
+            --border-strong: #2c3647;
+            --text: #e7eaf0;
+            --text-2: #aab2c0;
+            --muted: #6f7a8c;
+            --accent: #6aa8ff;
+            --enc: #5b8def;
+            --dec: #f08a4b;
+            --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+        * { box-sizing: border-box; }
+        html { background: var(--bg); }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Nav */
+        .nav {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(7, 9, 14, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1180px; margin: 0 auto; padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .nav .back { color: var(--text-2); font-size: 14px; }
+        .nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 26px; }
+        .nav ul a { color: var(--text-2); font-size: 14px; font-weight: 500; }
+        .nav a:hover { color: var(--text); text-decoration: none; }
+
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+        .prose { max-width: 760px; }
+
+        /* Hero */
+        .hero { padding: 30px 0 14px; position: relative; }
+        .hero::before {
+            content: ""; position: absolute; inset: -40px 0 auto 0; height: 420px; z-index: -1;
+            background:
+                radial-gradient(600px 240px at 20% 20%, rgba(70, 134, 251, 0.10), transparent 70%),
+                radial-gradient(500px 220px at 85% 10%, rgba(240, 138, 75, 0.08), transparent 70%);
+        }
+        .eyebrow {
+            font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); margin: 0 0 10px;
+        }
+        h1 {
+            font-size: clamp(26px, 3.2vw, 36px); line-height: 1.15; letter-spacing: -0.02em;
+            margin: 0 0 10px; font-weight: 700; max-width: 1000px;
+        }
+        .authors { color: var(--text-2); margin: 0; font-size: 15px; }
+        .hero-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+        .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
+            border: 1px solid var(--border-strong); color: var(--text); background: var(--surface);
+            transition: border-color .2s, background .2s;
+        }
+        .btn:hover { border-color: var(--accent); background: var(--surface-2); text-decoration: none; }
+        .btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .btn.primary:hover { background: #fff; }
+        .btn svg { width: 16px; height: 16px; }
+
+        /* Demo card */
+        .demo {
+            margin: 18px 0 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .demo-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; }
+        .stage { position: relative; min-height: 360px; height: clamp(360px, calc(100vh - 400px), 600px); background: radial-gradient(circle at 50% 45%, #0f1522 0%, #070a10 75%); }
+        #orbitCanvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+        #orbitCanvas.dragging { cursor: grabbing; }
+        .stage-hint {
+            position: absolute; top: 14px; left: 16px; font-size: 12px; color: var(--muted);
+            pointer-events: none; font-family: var(--mono);
+        }
+        .stage-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; background: rgba(14,18,26,.85); }
+        .seg button, .tool {
+            font: 500 12px var(--mono); color: var(--text-2); background: transparent;
+            border: 0; padding: 6px 9px; cursor: pointer;
+        }
+        .seg button + button { border-left: 1px solid var(--border-strong); }
+        .seg button:hover, .tool:hover { color: var(--text); background: var(--surface-2); }
+        .seg button.on { color: var(--bg); background: var(--text); }
+        .tool { border: 1px solid var(--border-strong); border-radius: 8px; background: rgba(14,18,26,.85); }
+        .loading {
+            position: absolute; inset: 0; display: grid; place-items: center;
+            color: var(--muted); font: 13px var(--mono); pointer-events: none;
+        }
+
+        .side { position: relative; border-left: 1px solid var(--border); padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 10px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
+        .stat .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+        .stat .v { font: 500 14px var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat.wide { grid-column: 1 / -1; }
+        .chart { position: relative; }
+        .chart h4 { margin: 0 0 4px; font-size: 12px; font-weight: 500; color: var(--text-2); }
+        .chart canvas { width: 100%; height: 112px; display: block; cursor: crosshair; }
+        .tip {
+            position: absolute; pointer-events: none; z-index: 5; display: none;
+            background: #0b0f17; border: 1px solid var(--border-strong); border-radius: 8px;
+            padding: 6px 9px; font: 12px var(--mono); color: var(--text); white-space: nowrap;
+            box-shadow: 0 6px 20px rgba(0,0,0,.4);
+        }
+        .tip .m { color: var(--muted); }
+
+        .controls { border-top: 1px solid var(--border); padding: 16px 22px 18px; }
+        .slider { position: relative; user-select: none; }
+        .fam-row { position: relative; height: 20px; margin-bottom: 4px; }
+        .fam-row span {
+            position: absolute; top: 0; transform: translateX(-50%);
+            font-size: 12px; color: var(--text-2); white-space: nowrap;
+        }
+        .track {
+            position: relative; height: 30px; border-radius: 8px; cursor: pointer; touch-action: none;
+        }
+        .track .grad { position: absolute; inset: 0; border-radius: 8px; }
+        .track .shade { position: absolute; top: 0; bottom: 0; background: rgba(7, 9, 14, 0.72); }
+        .track .shade.l { left: 0; border-radius: 8px 0 0 8px; }
+        .track .shade.r { right: 0; border-radius: 0 8px 8px 0; }
+        .track .sel { position: absolute; top: -3px; bottom: -3px; border: 2px solid #fff; border-radius: 7px; cursor: grab; }
+        .track .sep { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(7,9,14,.55); transform: translateX(-1px); pointer-events: none; }
+        .thumb {
+            position: absolute; top: 50%; width: 14px; height: 40px; margin-left: -7px; transform: translateY(-50%);
+            background: #fff; border-radius: 5px; box-shadow: 0 0 0 3px rgba(7,9,14,.8); cursor: ew-resize;
+        }
+        .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .ticks { position: relative; height: 18px; margin-top: 6px; font: 11px var(--mono); color: var(--muted); }
+        .ticks span { position: absolute; transform: translateX(-50%); }
+        .row2 { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 14px; }
+        .row2 label { font-size: 13px; color: var(--text-2); display: inline-flex; align-items: center; gap: 10px; }
+        .row2 input[type=range] { width: 150px; accent-color: #fff; }
+        .row2 .val { font: 500 13px var(--mono); color: var(--text); min-width: 28px; }
+        .play { display: inline-flex; align-items: center; gap: 7px; font: 500 13px 'Inter', sans-serif; padding: 7px 14px; border-radius: 999px; }
+        .caption { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+        /* Sections */
+        section { padding: 56px 0 0; }
+        h2 { font-size: 24px; letter-spacing: -0.01em; margin: 0 0 12px; }
+        p { color: var(--text-2); margin: 0 0 14px; }
+        p strong { color: var(--text); font-weight: 600; }
+        .eq {
+            font-family: 'Times New Roman', Georgia, serif; font-size: 21px; color: var(--text);
+            margin: 18px 0; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; overflow-x: auto; white-space: nowrap;
+        }
+        .eq i { font-style: italic; }
+        .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+        .card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+        .card p { font-size: 14px; margin: 0; }
+
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; counter-reset: s; }
+        .step { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 16px 14px; }
+        .step::before {
+            counter-increment: s; content: "0" counter(s);
+            font: 500 12px var(--mono); color: var(--muted); display: block; margin-bottom: 8px;
+        }
+        .step h3 { margin: 0 0 6px; font-size: 15px; }
+        .step p { font-size: 13.5px; margin: 0; }
+        .step code { font: 12px var(--mono); color: var(--text); }
+
+        .arch { margin-top: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px; }
+        .arch svg { width: 100%; height: auto; display: block; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 18px; }
+        th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+        th:first-child, td:first-child { text-align: left; }
+        th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+        td { font-family: var(--mono); font-size: 13px; color: var(--text-2); }
+        td:first-child { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); }
+        tr.hl td { color: var(--text); background: rgba(255,255,255,.03); }
+        .table-scroll { overflow-x: auto; }
+        .note { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+        .gallery { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 22px; }
+        .gallery figure { margin: 0; cursor: zoom-in; }
+        .gallery img {
+            width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: top;
+            border-radius: 10px; background: #fff; display: block; border: 1px solid var(--border);
+            transition: transform .2s, border-color .2s;
+        }
+        .gallery figure:hover img { transform: translateY(-2px); border-color: var(--border-strong); }
+        .gallery figcaption { font-size: 12.5px; color: var(--text-2); margin-top: 6px; }
+
+        .cite {
+            position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px 18px; font: 12.5px/1.6 var(--mono); color: var(--text-2); overflow-x: auto; margin: 16px 0 0;
+        }
+        .copy { position: absolute; top: 10px; right: 10px; }
+
+        footer { padding: 56px 0 40px; color: var(--muted); font-size: 13px; }
+
+        #lightbox {
+            position: fixed; inset: 0; z-index: 100; display: none; place-items: center;
+            background: rgba(0,0,0,.85); cursor: zoom-out; padding: 24px;
+        }
+        #lightbox.show { display: grid; }
+        #lightbox img { max-width: 100%; max-height: 90vh; border-radius: 8px; background: #fff; }
+
+        @media (max-width: 960px) {
+            .demo-grid { grid-template-columns: 1fr; }
+            .side { border-left: 0; border-top: 1px solid var(--border); }
+            .stage { height: 440px; }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+            .gallery { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 620px) {
+            .wrap, .nav-inner { padding-left: 16px; padding-right: 16px; }
+            .nav .back, .stage-hint { display: none; }
+            .stage { height: 360px; }
+            .cards, .steps { grid-template-columns: 1fr; }
+            .gallery { grid-template-columns: repeat(2, 1fr); }
+            .controls { padding: 14px 16px 16px; }
+            .fam-row span { font-size: 10.5px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a class="back" href="/research.html">&larr; Research</a>
+            <ul>
+                <li><a href="/index.html">About</a></li>
+                <li><a href="/research.html">Research</a></li>
+                <li><a href="/hobbies.html">Hobbies</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="wrap">
+        <header class="hero">
+            <p class="eyebrow">CU Boulder &middot; CSML &middot; JGCD 2026</p>
+            <h1>Autoencoder Neural Networks for Representations of Periodic Orbit Families</h1>
+            <div class="hero-row">
+            <p class="authors">Thomas H. Clark &amp; Daniel J. Scheeres</p>
+            <div class="btns">
+                <a class="btn primary" href="https://doi.org/10.2514/1.G009889" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>
+                    Paper
+                </a>
+                <a class="btn" href="https://github.com/tommyhclark/PeriodicOrbitAutoencoder" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.82 1.19 3.08 0 4.41-2.7 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+                    Code
+                </a>
+            </div>
+            </div>
+        </header>
+
+        <!-- Interactive decoder -->
+        <div class="demo" id="demo">
+            <div class="demo-grid">
+                <div class="stage" id="stage">
+                    <canvas id="orbitCanvas" aria-label="3D view of decoded periodic orbits"></canvas>
+                    <div class="stage-hint">drag to rotate &middot; pinch or &plusmn; to zoom</div>
+                    <div class="stage-tools">
+                        <div class="seg" id="views">
+                            <button data-view="3d" class="on">3D</button>
+                            <button data-view="xy">XY</button>
+                            <button data-view="xz">XZ</button>
+                            <button data-view="yz">YZ</button>
+                        </div>
+                        <button class="tool" id="zoomIn" aria-label="Zoom in">+</button>
+                        <button class="tool" id="zoomOut" aria-label="Zoom out">&minus;</button>
+                        <button class="tool" id="fit">fit</button>
+                    </div>
+                    <div class="loading" id="loading">loading decoder weights&hellip;</div>
+                </div>
+                <aside class="side">
+                    <div class="stats">
+                        <div class="stat wide"><div class="k">Latent window</div><div class="v" id="sWin">&ndash;</div></div>
+                        <div class="stat wide"><div class="k">Families</div><div class="v" id="sFam">&ndash;</div></div>
+                        <div class="stat"><div class="k">Period</div><div class="v" id="sT">&ndash;</div></div>
+                        <div class="stat"><div class="k">Decoded</div><div class="v" id="sMs">&ndash;</div></div>
+                    </div>
+                    <div class="chart">
+                        <h4>Period [TU] vs. latent <i>c</i></h4>
+                        <canvas id="chartT"></canvas>
+                    </div>
+                    <div class="chart">
+                        <h4>Jacobi constant vs. latent <i>c</i></h4>
+                        <canvas id="chartC"></canvas>
+                    </div>
+                    <div class="tip" id="tip"></div>
+                </aside>
+            </div>
+            <div class="controls">
+                <div class="slider">
+                    <div class="fam-row" id="famRow"></div>
+                    <div class="track" id="track">
+                        <div class="grad" id="grad"></div>
+                        <div class="shade l" id="shadeL"></div>
+                        <div class="shade r" id="shadeR"></div>
+                        <div class="sel" id="sel"></div>
+                        <div class="thumb" id="thLo" role="slider" tabindex="0" aria-label="Latent window start"></div>
+                        <div class="thumb" id="thHi" role="slider" tabindex="0" aria-label="Latent window end"></div>
+                    </div>
+                    <div class="ticks" id="ticks"></div>
+                </div>
+                <div class="row2">
+                    <label>Orbits <input type="range" id="nOrb" min="1" max="120" value="48"><span class="val" id="nOrbV">48</span></label>
+                    <label><input type="checkbox" id="nodes"> Show 51 decoded nodes</label>
+                    <button class="tool play" id="play">
+                        <svg id="playIcon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l9 5-9 5z"/></svg>
+                        <span id="playLbl">Sweep</span>
+                    </button>
+                </div>
+                <p class="caption">This runs the trained multi-family decoder (1 &rarr; 102 &rarr; 2601 &rarr; 307) in your browser. Drag the window or its edges; each curve is the raw, uncorrected decoder output for one value of <i>c</i>, limited to the latent range of the 6,537 training orbits.</p>
+            </div>
+        </div>
+
+        <section class="prose">
+            <h2>The idea</h2>
+            <p>Periodic orbits in the Earth&ndash;Moon three-body problem come in continuous families, but they are usually stored as discrete tables of initial conditions. We train an autoencoder to compress an <strong>entire orbit</strong> (51 states equally spaced in time, plus the period) into <strong>one number</strong>, <i>c</i>. The decoder then works as a continuous map from <i>c</i> to an initial guess for multiple shooting:</p>
+            <div class="eq"><i>D</i>(<i>c</i>) = [ &psi;(<i>c</i>, &theta;<sub>0</sub>), &psi;(<i>c</i>, &theta;<sub>1</sub>), &hellip;, &psi;(<i>c</i>, &theta;<sub>50</sub>), <i>T</i> ],&ensp; &theta;<sub><i>i</i></sub> = 2&pi;<i>i</i>/51</div>
+        </section>
+        <div class="cards">
+            <div class="card"><h3>A continuous database</h3><p>One scalar picks out a unique orbit. The latent is monotonic along the family, which the period and Jacobi constant are not.</p></div>
+            <div class="card"><h3>Fully correctable</h3><p>Every decoded test orbit converges to a true periodic orbit, with a median of 3&ndash;4 Newton iterations.</p></div>
+            <div class="card"><h3>Across bifurcations</h3><p>A single network spans the L<sub>2</sub> Halo, Lyapunov, Axial, and Vertical families, as in the demo above.</p></div>
+        </div>
+
+        <section>
+            <h2>Pipeline</h2>
+            <div class="steps">
+                <div class="step"><h3>Generate families</h3><p>Continue a JPL seed orbit with pseudo-arclength continuation until a bifurcation or lunar impact.</p></div>
+                <div class="step"><h3>Build training vectors</h3><p>Phase each orbit to start at apolune, sample 51 nodes in time, correct with multiple shooting, and flatten to 307 numbers.</p></div>
+                <div class="step"><h3>Train</h3><p>A symmetric MLP with a 1-D bottleneck, trained with Adam on <code>MSE(states) + &lambda;<sub>T</sub>&middot;MSE(T)</code>.</p></div>
+                <div class="step"><h3>Decode &amp; correct</h3><p>Decode midpoints between training latents and correct them with variable-period multiple shooting.</p></div>
+            </div>
+            <div class="arch" aria-label="Autoencoder architecture: 307, 2601, 102, 1, 102, 2601, 307">
+                <svg viewBox="0 0 1000 270" role="img">
+                    <defs>
+                        <linearGradient id="turboG" x1="0" x2="1">
+                            <stop offset="0" stop-color="#3d5ecb"/><stop offset=".3" stop-color="#27c5dc"/>
+                            <stop offset=".55" stop-color="#a4fc3c"/><stop offset=".78" stop-color="#fb9b2d"/><stop offset="1" stop-color="#c52c04"/>
+                        </linearGradient>
+                    </defs>
+                    <g id="archLayers"></g>
+                </svg>
+            </div>
+        </section>
+
+        <section>
+            <h2>Results</h2>
+            <p class="prose">Models were trained on five single families and on the multi-family path. Test orbits lie <em>between</em> training samples, so every result is an interpolation in latent space.</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>Family</th><th>Training orbits</th><th>&Vert;F(V)&Vert; initial</th><th>Newton steps</th><th>&Delta;T</th></tr></thead>
+                    <tbody>
+                        <tr><td>L<sub>1</sub> Lyapunov</td><td>5,855</td><td>1.6e-3</td><td>3</td><td>1.4e-3</td></tr>
+                        <tr><td>L<sub>2</sub> Lyapunov</td><td>4,330</td><td>1.6e-3</td><td>3.6</td><td>3.2e-3</td></tr>
+                        <tr><td>L<sub>2</sub> Halo</td><td>6,052</td><td>1.5e-3</td><td>4</td><td>8.5e-4</td></tr>
+                        <tr><td>L<sub>2</sub> Vertical</td><td>7,012</td><td>1.4e-3</td><td>3</td><td>4.9e-4</td></tr>
+                        <tr><td>L<sub>2</sub> Axial</td><td>1,550</td><td>2.5e-3</td><td>4</td><td>2.1e-4</td></tr>
+                        <tr class="hl"><td>Multi-family (demo)</td><td>6,537</td><td>1.4e-3</td><td>3</td><td>5.6e-4</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note">Medians over the test set, averaged over five trainings. Nondimensional units.</p>
+            <div class="gallery" id="gallery">
+                <figure><img src="figures/l2_halo_family.jpg" alt="Decoded L2 Halo family" loading="lazy"><figcaption>L<sub>2</sub> Halo</figcaption></figure>
+                <figure><img src="figures/l1_lyapunov_family.jpg" alt="Decoded L1 Lyapunov family" loading="lazy"><figcaption>L<sub>1</sub> Lyapunov</figcaption></figure>
+                <figure><img src="figures/l2_lyapunov_family.jpg" alt="Decoded L2 Lyapunov family" loading="lazy"><figcaption>L<sub>2</sub> Lyapunov</figcaption></figure>
+                <figure><img src="figures/l2_vertical_family.jpg" alt="Decoded L2 Vertical family" loading="lazy"><figcaption>L<sub>2</sub> Vertical</figcaption></figure>
+                <figure><img src="figures/l2_axial_family.jpg" alt="Decoded L2 Axial family" loading="lazy"><figcaption>L<sub>2</sub> Axial</figcaption></figure>
+            </div>
+        </section>
+
+        <section class="prose">
+            <h2>Citation</h2>
+            <p>Published in the <em>Journal of Guidance, Control, and Dynamics</em>. An earlier version was presented at the 2025 AAS/AIAA Astrodynamics Specialist Conference.</p>
+            <pre class="cite" id="bib">@article{clark2026autoencoder,
+  title   = {Autoencoder Neural Networks for Representations of Periodic Orbit Families},
+  author  = {Clark, Thomas H. and Scheeres, Daniel J.},
+  journal = {Journal of Guidance, Control, and Dynamics},
+  year    = {2026},
+  doi     = {10.2514/1.G009889}
+}<button class="tool copy" id="copyBib">copy</button></pre>
+        </section>
+
+        <footer>Supported by a NASA Space Technology Graduate Research Opportunity (NSTGRO).</footer>
+    </main>
+
+    <div id="lightbox"><img alt=""></div>
+
+<script>
+(() => {
+    // ---------- Constants from the Halo2VerticalDoedel model ----------
+    const MU = 0.01215058560962404;
+    const X_L2 = 1.1556821654448841;           // training data stores x - x_L2
+    const R_MOON = 1737.1 / 384400;            // LU
+    const TU_DAYS = 4.3425;                    // approx. days per TU
+    const C_MIN = -3.6428446769714355, C_MAX = 0.6517215967178345;   // training latent range
+    const FAMILIES = [                         // boundaries from training-set ordering
+        { name: 'Vertical', lo: C_MIN,     hi: -2.114389 },
+        { name: 'Axial',    lo: -2.114389, hi: -1.124107 },
+        { name: 'Lyapunov', lo: -1.124107, hi: -0.586158 },
+        { name: 'Halo',     lo: -0.586158, hi: C_MAX },
+    ];
+    const N = 51, NS = 4;                      // nodes, spline samples per segment
+
+    // ---------- Turbo colormap (Mikhail 2019 polynomial fit) ----------
+    function turbo(x) {
+        x = Math.min(1, Math.max(0, x));
+        const r = 0.13572138 + x * (4.61539260 + x * (-42.66032258 + x * (132.13108234 + x * (-152.94239396 + x * 59.28637943))));
+        const g = 0.09140261 + x * (2.19418839 + x * (4.84296658 + x * (-14.18503333 + x * (4.27729857 + x * 2.82956604))));
+        const b = 0.10667330 + x * (12.64194608 + x * (-60.58204836 + x * (110.36276771 + x * (-89.90310912 + x * 27.34824973))));
+        const c = v => Math.round(255 * Math.min(1, Math.max(0, v)));
+        return `rgb(${c(r)},${c(g)},${c(b)})`;
+    }
+    // Trim the darkest ends of turbo so every orbit reads on a dark background.
+    const colorOf = c => turbo(0.1 + 0.85 * (c - C_MIN) / (C_MAX - C_MIN));
+
+    // ---------- Decoder ----------
+    let W0, B0, W1, B1, W2, B2;
+    const h1 = new Float32Array(102), h2 = new Float32Array(2601);
+    function decode(c) {
+        for (let i = 0; i < 102; i++) { const v = W0[i] * c + B0[i]; h1[i] = v > 0 ? v : 0.01 * v; }
+        for (let j = 0; j < 2601; j++) {
+            let s = B1[j]; const o = j * 102;
+            for (let i = 0; i < 102; i++) s += W1[o + i] * h1[i];
+            h2[j] = s > 0 ? s : 0.01 * s;
+        }
+        const out = new Float32Array(307);
+        for (let k = 0; k < 307; k++) {
+            let s = B2[k]; const o = k * 2601;
+            for (let j = 0; j < 2601; j++) s += W2[o + j] * h2[j];
+            out[k] = s;
+        }
+        return out;
+    }
+    function jacobi(o) {
+        let sum = 0;
+        for (let i = 0; i < N; i++) {
+            const x = o[6 * i] + X_L2, y = o[6 * i + 1], z = o[6 * i + 2];
+            const vx = o[6 * i + 3], vy = o[6 * i + 4], vz = o[6 * i + 5];
+            const r1 = Math.hypot(x + MU, y, z), r2 = Math.hypot(x - 1 + MU, y, z);
+            sum += x * x + y * y + 2 * (1 - MU) / r1 + 2 * MU / r2 - (vx * vx + vy * vy + vz * vz);
+        }
+        return sum / N;
+    }
+    // Closed Catmull-Rom spline through the 51 nodes (they are equally spaced in time).
+    function spline(o) {
+        const pts = new Float32Array(N * NS * 3);
+        const P = i => { i = (i + N) % N; return [o[6 * i] + X_L2, o[6 * i + 1], o[6 * i + 2]]; };
+        let p = 0;
+        for (let i = 0; i < N; i++) {
+            const a = P(i - 1), b = P(i), c = P(i + 1), d = P(i + 2);
+            for (let s = 0; s < NS; s++) {
+                const t = s / NS, t2 = t * t, t3 = t2 * t;
+                for (let k = 0; k < 3; k++) {
+                    pts[p++] = 0.5 * (2 * b[k] + (-a[k] + c[k]) * t + (2 * a[k] - 5 * b[k] + 4 * c[k] - d[k]) * t2 + (-a[k] + 3 * b[k] - 3 * c[k] + d[k]) * t3);
+                }
+            }
+        }
+        return pts;
+    }
+
+    // Cache decoded orbits on a fine latent grid so sweeping stays smooth.
+    const GRID = 8192, cache = new Map();
+    const snap = c => Math.round((c - C_MIN) / (C_MAX - C_MIN) * GRID);
+    const orbitAt = c => orbitKey(snap(c));
+    function orbitKey(key) {
+        let e = cache.get(key);
+        if (!e) {
+            const cc = C_MIN + key / GRID * (C_MAX - C_MIN);
+            const o = decode(cc);
+            e = { c: cc, raw: o, pts: spline(o), T: o[306] };
+            cache.set(key, e);
+            if (cache.size > 4000) cache.delete(cache.keys().next().value);
+        }
+        return e;
+    }
+
+    // ---------- State ----------
+    const st = {
+        lo: C_MIN, hi: C_MAX, n: 48, nodes: false,
+        az: -0.95, el: 0.42, zoom: 1, view: '3d',
+        center: [1.06, 0, 0], radius: 0.3, target: null,
+        orbits: [], playing: false, dir: 1, ready: false, dirty: true,
+    };
+    const $ = id => document.getElementById(id);
+
+    // ---------- 3D canvas ----------
+    const cv = $('orbitCanvas'), ctx = cv.getContext('2d');
+    let W = 0, H = 0, DPR = 1;
+    function resize() {
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+        const r = cv.getBoundingClientRect();
+        W = r.width; H = r.height;
+        cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+        resizeCharts();
+        st.dirty = true;
+    }
+
+    function projector() {
+        const ca = Math.cos(st.az), sa = Math.sin(st.az), ce = Math.cos(st.el), se = Math.sin(st.el);
+        const [cx, cy, cz] = st.center;
+        const scale = Math.min(W, H) / (2.15 * st.radius) * st.zoom;
+        const ox = W / 2, oy = H / 2 + 6;
+        return (x, y, z) => {
+            const px = x - cx, py = y - cy, pz = z - cz;
+            const x1 = ca * px - sa * py, y1 = sa * px + ca * py;
+            return [ox + x1 * scale, oy - (y1 * se + pz * ce) * scale, scale];
+        };
+    }
+
+    function draw() {
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        if (!st.ready) return;
+        const proj = projector();
+
+        // Reference grid in the z = 0 plane
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(170,178,192,0.07)';
+        const g = 0.1, gx0 = 0.8, gx1 = 1.4, gy = 0.3;
+        ctx.beginPath();
+        for (let x = gx0; x <= gx1 + 1e-9; x += g) { const a = proj(x, -gy, 0), b = proj(x, gy, 0); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+        for (let y = -gy; y <= gy + 1e-9; y += g) { const a = proj(gx0, y, 0), b = proj(gx1, y, 0); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+        ctx.stroke();
+
+        // Orbits
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = st.orbits.length > 60 ? 1 : 1.35;
+        ctx.globalAlpha = 0.9;
+        for (const o of st.orbits) {
+            ctx.strokeStyle = colorOf(o.c);
+            ctx.beginPath();
+            const p = o.pts, m = p.length / 3;
+            for (let i = 0; i <= m; i++) {
+                const j = (i % m) * 3, q = proj(p[j], p[j + 1], p[j + 2]);
+                i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]);
+            }
+            ctx.stroke();
+            if (st.nodes) {
+                ctx.fillStyle = ctx.strokeStyle;
+                for (let i = 0; i < N; i++) {
+                    const q = proj(o.raw[6 * i] + X_L2, o.raw[6 * i + 1], o.raw[6 * i + 2]);
+                    ctx.fillRect(q[0] - 1.3, q[1] - 1.3, 2.6, 2.6);
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+
+        // Moon and L2
+        const m = proj(1 - MU, 0, 0), mr = Math.max(3, R_MOON * m[2]);
+        const grd = ctx.createRadialGradient(m[0] - mr * 0.35, m[1] - mr * 0.35, mr * 0.1, m[0], m[1], mr);
+        grd.addColorStop(0, '#d9dde4'); grd.addColorStop(1, '#6b7280');
+        ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(m[0], m[1], mr, 0, 2 * Math.PI); ctx.fill();
+        const l = proj(X_L2, 0, 0);
+        ctx.strokeStyle = 'rgba(231,234,240,0.8)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(l[0] - 4, l[1] - 4); ctx.lineTo(l[0] + 4, l[1] + 4); ctx.moveTo(l[0] + 4, l[1] - 4); ctx.lineTo(l[0] - 4, l[1] + 4); ctx.stroke();
+        ctx.font = '11px "JetBrains Mono", monospace'; ctx.fillStyle = '#aab2c0';
+        ctx.fillText('Moon', m[0] + mr + 5, m[1] + 4);
+        ctx.fillText('L2', l[0] + 7, l[1] + 4);
+
+        // Axis triad
+        const ax = 40, ay = H - 36, L = 22;
+        const ca = Math.cos(st.az), sa = Math.sin(st.az), ce = Math.cos(st.el), se = Math.sin(st.el);
+        [['x', 1, 0, 0], ['y', 0, 1, 0], ['z', 0, 0, 1]].forEach(([n, x, y, z]) => {
+            const x1 = ca * x - sa * y, y1 = sa * x + ca * y;
+            const dx = x1 * L, dy = -(y1 * se + z * ce) * L;
+            if (Math.hypot(dx, dy) < 2) { ctx.fillText(n + '⊙', ax - 6, ay + 4); return; }
+            ctx.strokeStyle = 'rgba(170,178,192,0.6)'; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + dx, ay + dy); ctx.stroke();
+            ctx.fillText(n, ax + dx * 1.35 - 3, ay + dy * 1.35 + 4);
+        });
+    }
+
+    // ---------- Decode the current window ----------
+    function family(c) { return FAMILIES.find(f => c >= f.lo && c <= f.hi + 1e-9) || FAMILIES[3]; }
+    function recompute() {
+        const t0 = performance.now();
+        // Orbits sit on a lattice of latent values, so moving the window reuses cached decodes.
+        const n = st.n, a = snap(st.lo), b = snap(st.hi), out = [];
+        if (n === 1 || b - a < 1) out.push(orbitKey(Math.round((a + b) / 2)));
+        else {
+            const d = Math.max(1, Math.round((b - a) / (n - 1)));
+            for (let k = Math.ceil(a / d) * d; k <= b; k += d) out.push(orbitKey(k));
+        }
+        st.orbits = out;
+        const ms = performance.now() - t0;
+
+        const Ts = out.map(o => o.T);
+        const tmin = Math.min(...Ts), tmax = Math.max(...Ts);
+        $('sWin').textContent = `c ∈ [${st.lo.toFixed(3)}, ${st.hi.toFixed(3)}]`;
+        const fams = FAMILIES.filter(f => f.hi > st.lo && f.lo < st.hi || f.lo <= st.lo && st.hi <= f.hi).map(f => f.name).reverse();
+        $('sFam').textContent = fams.length === 4 ? 'All four' : fams.reverse().join(' → ');
+        $('sT').textContent = out.length === 1 ? `${tmin.toFixed(3)} TU` : `${tmin.toFixed(2)}–${tmax.toFixed(2)}`;
+        $('sT').title = `${(tmin * TU_DAYS).toFixed(1)}–${(tmax * TU_DAYS).toFixed(1)} days`;
+        $('sMs').textContent = `${out.length} in ${ms < 1 ? '<1' : ms.toFixed(0)} ms`;
+        updateSlider();
+        drawCharts();
+        st.dirty = true;
+    }
+
+    function selectionBounds() {
+        let lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+        for (const o of st.orbits) for (let i = 0; i < N; i++) for (let k = 0; k < 3; k++) {
+            const v = o.raw[6 * i + k] + (k === 0 ? X_L2 : 0);
+            if (v < lo[k]) lo[k] = v; if (v > hi[k]) hi[k] = v;
+        }
+        return { center: lo.map((v, k) => (v + hi[k]) / 2), radius: Math.max(0.02, Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) / 2) };
+    }
+    function fitView() { st.target = selectionBounds(); st.zoom = 1; }
+
+    // ---------- Latent slider ----------
+    const track = $('track');
+    const frac = c => (c - C_MIN) / (C_MAX - C_MIN);
+    const pct = c => (100 * frac(c)).toFixed(3) + '%';
+    function buildSlider() {
+        const stops = [];
+        for (let i = 0; i <= 24; i++) { const c = C_MIN + (C_MAX - C_MIN) * i / 24; stops.push(`${colorOf(c)} ${(100 * i / 24).toFixed(1)}%`); }
+        $('grad').style.background = `linear-gradient(90deg, ${stops.join(',')})`;
+        FAMILIES.forEach((f, i) => {
+            const s = document.createElement('span');
+            s.textContent = f.name; s.style.left = pct((f.lo + f.hi) / 2);
+            $('famRow').appendChild(s);
+            if (i) { const d = document.createElement('div'); d.className = 'sep'; d.style.left = pct(f.lo); track.insertBefore(d, $('shadeL')); }
+        });
+        [-3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0, 0.5].forEach(v => {
+            const s = document.createElement('span'); s.textContent = v; s.style.left = pct(v); $('ticks').appendChild(s);
+        });
+    }
+    function updateSlider() {
+        $('thLo').style.left = pct(st.lo); $('thHi').style.left = pct(st.hi);
+        $('sel').style.left = pct(st.lo); $('sel').style.width = (100 * (frac(st.hi) - frac(st.lo))).toFixed(3) + '%';
+        $('shadeL').style.width = pct(st.lo); $('shadeR').style.width = (100 * (1 - frac(st.hi))).toFixed(3) + '%';
+        $('thLo').setAttribute('aria-valuenow', st.lo.toFixed(3));
+        $('thHi').setAttribute('aria-valuenow', st.hi.toFixed(3));
+    }
+    function setWindow(lo, hi) {
+        const w = hi - lo;
+        if (lo < C_MIN) { lo = C_MIN; hi = lo + w; }
+        if (hi > C_MAX) { hi = C_MAX; lo = hi - w; }
+        st.lo = Math.max(C_MIN, Math.min(lo, hi)); st.hi = Math.min(C_MAX, Math.max(lo, hi));
+        schedule();
+    }
+    let pending = false;
+    function schedule() { if (!pending && st.ready) { pending = true; requestAnimationFrame(() => { pending = false; recompute(); }); } }
+
+    let drag = null;
+    track.addEventListener('pointerdown', e => {
+        stopPlay();
+        const r = track.getBoundingClientRect();
+        const c = C_MIN + (e.clientX - r.left) / r.width * (C_MAX - C_MIN);
+        const px = x => r.left + frac(x) * r.width;
+        const dLo = Math.abs(e.clientX - px(st.lo)), dHi = Math.abs(e.clientX - px(st.hi));
+        if (Math.min(dLo, dHi) < 12) drag = { mode: dLo <= dHi ? 'lo' : 'hi' };
+        else if (c > st.lo && c < st.hi) drag = { mode: 'move', c0: c, lo: st.lo, hi: st.hi };
+        else { drag = { mode: c < st.lo ? 'lo' : 'hi' }; }
+        track.setPointerCapture(e.pointerId);
+        onDrag(e);
+    });
+    track.addEventListener('pointermove', e => drag && onDrag(e));
+    track.addEventListener('pointerup', () => drag = null);
+    track.addEventListener('pointercancel', () => drag = null);
+    function onDrag(e) {
+        const r = track.getBoundingClientRect();
+        const c = C_MIN + Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * (C_MAX - C_MIN);
+        if (drag.mode === 'lo') setWindow(Math.min(c, st.hi), st.hi);
+        else if (drag.mode === 'hi') setWindow(st.lo, Math.max(c, st.lo));
+        else if (drag.mode === 'move') { const d = c - drag.c0; setWindow(drag.lo + d, drag.hi + d); }
+    }
+    ['thLo', 'thHi'].forEach(id => $(id).addEventListener('keydown', e => {
+        const step = e.shiftKey ? 0.1 : 0.01;
+        const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? step : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -step : 0;
+        if (!d) return;
+        e.preventDefault(); stopPlay();
+        id === 'thLo' ? setWindow(Math.min(st.lo + d, st.hi), st.hi) : setWindow(st.lo, Math.max(st.hi + d, st.lo));
+    }));
+
+    // ---------- Latent charts (period, Jacobi) ----------
+    const dense = { c: [], T: [], C: [] };
+    const charts = [
+        { el: $('chartT'), key: 'T', fmt: v => `${v.toFixed(3)} TU (${(v * TU_DAYS).toFixed(1)} d)` },
+        { el: $('chartC'), key: 'C', fmt: v => v.toFixed(4) },
+    ];
+    const PAD = { l: 38, r: 6, t: 6, b: 18 };
+    function resizeCharts() {
+        charts.forEach(ch => {
+            const r = ch.el.getBoundingClientRect();
+            ch.w = r.width; ch.h = r.height;
+            ch.el.width = Math.round(r.width * DPR); ch.el.height = Math.round(r.height * DPR);
+        });
+        drawCharts();
+    }
+    function drawCharts(hoverC) {
+        if (!dense.c.length) return;
+        charts.forEach(ch => {
+            const g = ch.el.getContext('2d'), ys = dense[ch.key];
+            g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, ch.w, ch.h);
+            let y0 = Math.min(...ys), y1 = Math.max(...ys); const pad = (y1 - y0) * 0.08; y0 -= pad; y1 += pad;
+            ch.y0 = y0; ch.y1 = y1;
+            const X = c => PAD.l + frac(c) * (ch.w - PAD.l - PAD.r);
+            const Y = v => PAD.t + (1 - (v - y0) / (y1 - y0)) * (ch.h - PAD.t - PAD.b);
+            ch.X = X; ch.Y = Y;
+            // selection band
+            g.fillStyle = 'rgba(255,255,255,0.06)';
+            g.fillRect(X(st.lo), PAD.t, Math.max(1, X(st.hi) - X(st.lo)), ch.h - PAD.t - PAD.b);
+            // gridlines + labels
+            g.font = '10px "JetBrains Mono", monospace'; g.fillStyle = '#6f7a8c'; g.strokeStyle = 'rgba(170,178,192,0.08)'; g.lineWidth = 1;
+            for (let i = 0; i <= 2; i++) {
+                const v = y0 + pad + (y1 - y0 - 2 * pad) * i / 2, yy = Math.round(Y(v)) + 0.5;
+                g.beginPath(); g.moveTo(PAD.l, yy); g.lineTo(ch.w - PAD.r, yy); g.stroke();
+                g.textAlign = 'right'; g.fillText(v.toFixed(ch.key === 'T' ? 1 : 2), PAD.l - 5, yy + 3);
+            }
+            g.textAlign = 'center';
+            [-3, -2, -1, 0].forEach(v => g.fillText(v, X(v), ch.h - 4));
+            // family boundaries
+            g.setLineDash([2, 3]); g.strokeStyle = 'rgba(170,178,192,0.18)';
+            FAMILIES.slice(1).forEach(f => { const xx = Math.round(X(f.lo)) + 0.5; g.beginPath(); g.moveTo(xx, PAD.t); g.lineTo(xx, ch.h - PAD.b); g.stroke(); });
+            g.setLineDash([]);
+            // colored curve, dimmed outside the window
+            g.lineWidth = 2; g.lineCap = 'round';
+            for (let i = 1; i < dense.c.length; i++) {
+                const cm = (dense.c[i] + dense.c[i - 1]) / 2;
+                g.globalAlpha = cm >= st.lo && cm <= st.hi ? 1 : 0.35;
+                g.strokeStyle = colorOf(cm);
+                g.beginPath(); g.moveTo(X(dense.c[i - 1]), Y(ys[i - 1])); g.lineTo(X(dense.c[i]), Y(ys[i])); g.stroke();
+            }
+            g.globalAlpha = 1;
+            if (hoverC != null) {
+                const v = interp(ys, hoverC), xx = X(hoverC);
+                g.strokeStyle = 'rgba(231,234,240,0.35)'; g.beginPath(); g.moveTo(xx, PAD.t); g.lineTo(xx, ch.h - PAD.b); g.stroke();
+                g.fillStyle = colorOf(hoverC); g.strokeStyle = '#0e121a'; g.lineWidth = 2;
+                g.beginPath(); g.arc(xx, Y(v), 4.5, 0, 2 * Math.PI); g.fill(); g.stroke();
+            }
+        });
+    }
+    function interp(ys, c) {
+        const t = frac(c) * (dense.c.length - 1), i = Math.min(dense.c.length - 2, Math.floor(t)), f = t - i;
+        return ys[i] * (1 - f) + ys[i + 1] * f;
+    }
+    const tip = $('tip');
+    charts.forEach(ch => {
+        const toC = e => { const r = ch.el.getBoundingClientRect(); return C_MIN + Math.min(1, Math.max(0, (e.clientX - r.left - PAD.l) / (ch.w - PAD.l - PAD.r))) * (C_MAX - C_MIN); };
+        ch.el.addEventListener('pointermove', e => {
+            if (!dense.c.length) return;
+            const c = toC(e);
+            drawCharts(c);
+            const side = ch.el.parentElement.parentElement.getBoundingClientRect(), r = ch.el.getBoundingClientRect();
+            tip.innerHTML = `<span class="m">c</span> ${c.toFixed(3)} · ${family(c).name}<br>${ch.key === 'T' ? '<span class="m">T</span>' : '<span class="m">C</span>'} ${ch.fmt(interp(dense[ch.key], c))}`;
+            tip.style.display = 'block';
+            const x = e.clientX - side.left, tw = tip.offsetWidth;
+            tip.style.left = Math.max(4, Math.min(side.width - tw - 4, x - tw / 2)) + 'px';
+            tip.style.top = (r.top - side.top - tip.offsetHeight - 6) + 'px';
+        });
+        ch.el.addEventListener('pointerleave', () => { tip.style.display = 'none'; drawCharts(); });
+        ch.el.addEventListener('click', e => { stopPlay(); const c = toC(e), w = st.hi - st.lo; setWindow(c - w / 2, c + w / 2); });
+    });
+
+    // ---------- Camera interaction ----------
+    let rot = null;
+    cv.addEventListener('pointerdown', e => { rot = { x: e.clientX, y: e.clientY, az: st.az, el: st.el }; cv.setPointerCapture(e.pointerId); cv.classList.add('dragging'); });
+    cv.addEventListener('pointermove', e => {
+        if (!rot) return;
+        st.az = rot.az + (e.clientX - rot.x) * 0.008;
+        st.el = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rot.el + (e.clientY - rot.y) * 0.008));
+        setViewButton(null); st.dirty = true;
+    });
+    const endRot = () => { rot = null; cv.classList.remove('dragging'); };
+    cv.addEventListener('pointerup', endRot); cv.addEventListener('pointercancel', endRot);
+    cv.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); st.zoom = Math.max(0.3, Math.min(20, st.zoom * Math.exp(-e.deltaY * 0.01))); st.dirty = true; }, { passive: false });
+    cv.addEventListener('dblclick', () => { st.zoom = 1; st.dirty = true; });
+    $('zoomIn').onclick = () => { st.zoom = Math.min(20, st.zoom * 1.3); st.dirty = true; };
+    $('zoomOut').onclick = () => { st.zoom = Math.max(0.3, st.zoom / 1.3); st.dirty = true; };
+    $('fit').onclick = fitView;
+    const VIEWS = { '3d': [-0.95, 0.42], xy: [0, Math.PI / 2], xz: [0, 0], yz: [-Math.PI / 2, 0] };
+    function setViewButton(v) { document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === v)); }
+    document.querySelectorAll('#views button').forEach(b => b.onclick = () => {
+        st.camTarget = VIEWS[b.dataset.view]; setViewButton(b.dataset.view);
+    });
+
+    // ---------- Controls ----------
+    $('nOrb').addEventListener('input', e => { st.n = +e.target.value; $('nOrbV').textContent = st.n; schedule(); });
+    $('nodes').addEventListener('change', e => { st.nodes = e.target.checked; st.dirty = true; });
+    function stopPlay() { st.playing = false; $('playLbl').textContent = 'Sweep'; $('playIcon').innerHTML = '<path d="M2 1l9 5-9 5z"/>'; }
+    $('play').onclick = () => {
+        if (st.playing) return stopPlay();
+        st.playing = true; $('playLbl').textContent = 'Pause'; $('playIcon').innerHTML = '<path d="M2 1h3v10H2zM7 1h3v10H7z"/>';
+        if (st.hi - st.lo > 0.6 * (C_MAX - C_MIN)) setWindow(C_MIN, C_MIN + 0.35);
+    };
+    $('copyBib').onclick = () => {
+        const text = $('bib').firstChild.textContent;
+        navigator.clipboard?.writeText(text).then(() => { $('copyBib').textContent = 'copied'; setTimeout(() => $('copyBib').textContent = 'copy', 1500); });
+    };
+    const lb = $('lightbox');
+    $('gallery').addEventListener('click', e => { const img = e.target.closest('figure')?.querySelector('img'); if (img) { lb.querySelector('img').src = img.src; lb.classList.add('show'); } });
+    lb.onclick = () => lb.classList.remove('show');
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('show'); });
+
+    // ---------- Main loop ----------
+    let last = performance.now();
+    function frame(now) {
+        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        if (st.playing && st.ready) {
+            const w = st.hi - st.lo, v = 0.35 * st.dir * dt;
+            let lo = st.lo + v;
+            if (lo + w >= C_MAX) { lo = C_MAX - w; st.dir = -1; }
+            if (lo <= C_MIN) { lo = C_MIN; st.dir = 1; }
+            setWindow(lo, lo + w);
+        }
+        if (st.target) {
+            const k = 1 - Math.exp(-dt * 8);
+            st.center = st.center.map((v, i) => v + (st.target.center[i] - v) * k);
+            st.radius += (st.target.radius - st.radius) * k;
+            if (Math.abs(st.target.radius - st.radius) < 1e-4) st.target = null;
+            st.dirty = true;
+        }
+        if (st.camTarget) {
+            const k = 1 - Math.exp(-dt * 10);
+            let da = st.camTarget[0] - st.az; da = Math.atan2(Math.sin(da), Math.cos(da));
+            st.az += da * k; st.el += (st.camTarget[1] - st.el) * k;
+            if (Math.abs(da) < 1e-3 && Math.abs(st.camTarget[1] - st.el) < 1e-3) { st.az = st.camTarget[0]; st.el = st.camTarget[1]; st.camTarget = null; }
+            st.dirty = true;
+        }
+        if (st.dirty) { st.dirty = false; draw(); }
+        requestAnimationFrame(frame);
+    }
+
+    // ---------- Boot ----------
+    async function init() {
+        buildSlider(); updateSlider();
+        resize(); window.addEventListener('resize', resize);
+        requestAnimationFrame(frame);
+        try {
+            const buf = await (await fetch('decoder.bin')).arrayBuffer();
+            let off = 0;
+            const take = n => { const a = new Float32Array(buf, off, n); off += n * 4; return a; };
+            W0 = take(102); B0 = take(102); W1 = take(2601 * 102); B1 = take(2601); W2 = take(307 * 2601); B2 = take(307);
+        } catch (err) {
+            $('loading').textContent = 'could not load decoder weights';
+            return;
+        }
+        // Dense sweep for the latent charts and the global view extent.
+        $('loading').textContent = 'decoding family…';
+        const M = 220;
+        let lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+        for (let i = 0; i < M; i++) {
+            const e = orbitAt(C_MIN + (C_MAX - C_MIN) * i / (M - 1));
+            dense.c.push(e.c); dense.T.push(e.T); dense.C.push(jacobi(e.raw));
+            for (let j = 0; j < N; j++) for (let k = 0; k < 3; k++) {
+                const v = e.raw[6 * j + k] + (k === 0 ? X_L2 : 0);
+                if (v < lo[k]) lo[k] = v; if (v > hi[k]) hi[k] = v;
+            }
+            if (i % 20 === 19) await new Promise(r => setTimeout(r));
+        }
+        st.center = lo.map((v, k) => (v + hi[k]) / 2);
+        st.radius = Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) / 2 * 0.8;
+        st.full = { center: st.center.slice(), radius: st.radius };
+        $('loading').remove();
+        st.ready = true;
+        recompute();
+    }
+    init();
+})();
+</script>
+
+<script>
+// Architecture diagram: layer widths on a log scale.
+(() => {
+    const layers = [307, 2601, 102, 1, 102, 2601, 307];
+    const g = document.getElementById('archLayers'), NS = 'http://www.w3.org/2000/svg';
+    const cx = i => 90 + i * 136, hgt = n => 22 + 44 * Math.log10(n), mid = 128, bw = 26;
+    const el = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; g.appendChild(e); return e; };
+    for (let i = 0; i < layers.length - 1; i++) {
+        const a = hgt(layers[i]) / 2, b = hgt(layers[i + 1]) / 2, x0 = cx(i) + bw / 2, x1 = cx(i + 1) - bw / 2;
+        el('path', { d: `M${x0},${mid - a} L${x1},${mid - b} L${x1},${mid + b} L${x0},${mid + a} Z`, fill: i < 3 ? '#5b8def' : '#f08a4b', 'fill-opacity': 0.12 });
+    }
+    layers.forEach((n, i) => {
+        const h = hgt(n), fill = i === 3 ? 'url(#turboG)' : i < 3 ? '#5b8def' : '#f08a4b';
+        el('rect', { x: cx(i) - bw / 2, y: mid - h / 2, width: bw, height: h, rx: 6, fill });
+        el('text', { x: cx(i), y: 238, 'text-anchor': 'middle', 'font-size': 14, fill: '#e7eaf0', 'font-family': 'JetBrains Mono, monospace' }, n);
+    });
+    el('text', { x: cx(3), y: mid - 26, 'text-anchor': 'middle', 'font-size': 18, 'font-style': 'italic', fill: '#e7eaf0', 'font-family': 'Georgia, serif' }, 'c');
+    el('text', { x: (cx(0) + cx(2)) / 2 + 20, y: 26, 'text-anchor': 'middle', 'font-size': 14, fill: '#8fb0f5', 'font-weight': 600, 'font-family': 'Inter, sans-serif' }, 'Encoder');
+    el('text', { x: (cx(4) + cx(6)) / 2 - 20, y: 26, 'text-anchor': 'middle', 'font-size': 14, fill: '#f5ad80', 'font-weight': 600, 'font-family': 'Inter, sans-serif' }, 'Decoder');
+    el('text', { x: cx(0), y: 262, 'text-anchor': 'middle', 'font-size': 12, fill: '#6f7a8c', 'font-family': 'Inter, sans-serif' }, '51 × 6 states + T');
+    el('text', { x: cx(6), y: 262, 'text-anchor': 'middle', 'font-size': 12, fill: '#6f7a8c', 'font-family': 'Inter, sans-serif' }, 'decoded orbit');
+    el('text', { x: cx(3), y: 262, 'text-anchor': 'middle', 'font-size': 12, fill: '#6f7a8c', 'font-family': 'Inter, sans-serif' }, 'latent');
+})();
+</script>
+</body>
+</html>
